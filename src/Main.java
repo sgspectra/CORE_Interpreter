@@ -1,3 +1,4 @@
+import java.util.HashMap;
 import java.util.Scanner;
 
 public class Main {
@@ -11,10 +12,13 @@ public class Main {
         String filename = keyboard.nextLine();
         System.out.println("File Name: " + filename);
         Lexscan s = new Lexscan(filename);
+        System.out.println("Input name of second input file: (input values");
+        String inputValues = keyboard.nextLine();
         String test = s.getNext();
         while(!(test.equals("EOF"))){
             System.out.println(test);
-            test = s.getNext();
-        }
+            test = s.getNext();}
+        //ParseTree p = new ParseTree(s, inputValues);
+        //p.parse();
     }
 }

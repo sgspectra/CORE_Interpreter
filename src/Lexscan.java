@@ -95,11 +95,11 @@ public class Lexscan {
         }
         //Check for Assign
         else if((out.length() == 0) && (char) ch == ':'){
-            out = ":";
+            out = "COLON";
             advance();
             //Check the next character is =
             if((char) ch == '='){
-                out = ":=";
+                out = "ASSIGN";
                 advance();
             }
         }
