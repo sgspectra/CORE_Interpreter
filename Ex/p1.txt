@@ -1,0 +1,12 @@
+program
+int x;
+int y;
+begin
+input x;
+input y;
+while x<=y
+begin
+x:=x+y;
+endwhile;
+output x;
+end
