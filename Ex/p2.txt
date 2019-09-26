@@ -4,4 +4,5 @@ int y;
 begin
 input x;
 input y;
+output x;
 end

@@ -177,7 +177,7 @@ public class ParseTree {
             loc++;
             currentToken = s.get(loc);
             if (currentToken.equals("INT")){
-                i1 = new IdList("");
+                i1 = new IdList("DEC");
                 i1.parse();
             }
             //consume the semicolon
@@ -298,7 +298,6 @@ public class ParseTree {
         }
     }
 
-
     private class In{
         private IdList i1;
 
@@ -322,7 +321,6 @@ public class ParseTree {
         }
     }
 
-    //TODO Out
     private class Out{
         private Expr e1;
 
@@ -330,12 +328,9 @@ public class ParseTree {
             e1 = null;
         }
 
-        //TODO Parse
         public void parse(){
             //at this point the current token should be OUTPUT
             //move it to the expression
-            loc++;
-            currentToken = s.get(loc);
             e1 = new Expr();
             e1.parse();
             //consume the semicolon
@@ -346,57 +341,168 @@ public class ParseTree {
             }
         }
         public void exec(){
-            e1.exec();
+            System.out.println(e1.exec());
         }
         public void print(){
+            System.out.println("output");
             e1.print();
+            System.out.println(";");
         }
     }
 
-    //TODO Expr
     private class Expr{
+        //0- not used, 1- plus, 2- minus
+        private int plusMinus;
         private Term t1;
         private Expr e1;
 
         public Expr(){
             t1 = null;
             e1 = null;
+            plusMinus = 0;
         }
 
-        //TODO Parse
+
         public void parse(){
             //first parse the term
             t1 = new Term();
             t1.parse();
-            //grab the next token
-            loc++;
-            currentToken = s.get(loc);
-            if(currentToken.equals("+") || currentToken.equals("-")){
+            //looks at next token
+            if(s.get(loc+1).equals("+")){
+                loc++;
+                currentToken = s.get(loc);
                 e1 = new Expr();
                 e1.parse();
+                plusMinus = 1;
+            }else if(s.get(loc+1).equals("-")){
+                loc++;
+                currentToken = s.get(loc);
+                e1 = new Expr();
+                e1.parse();
+                plusMinus = 2;
             }
         }
-        //TODO Exec
-        public void exec(){
-
+        public int exec(){
+            int returnVal;
+            returnVal = t1.exec();
+            if((e1 != null) && (plusMinus == 1)){
+                returnVal = returnVal + e1.exec();
+            }else if((e1 != null) && (plusMinus == 2)){
+                returnVal = returnVal - e1.exec();
+            }
+            return returnVal;
         }
-        //TODO Print
         public void print(){
+            t1.print();
+            if((e1 != null) && plusMinus == 1){
+                System.out.println("+");
+                e1.print();
+            }
+            if((e1 != null) && plusMinus == 2){
+                System.out.println("-");
+                e1.print();
+            }
+        }
+    }
+
+    private class Term{
+        private Factor f1;
+        private Term t1;
+
+        public Term(){
+            f1 = null;
+            t1 = null;
+        }
+
+        public void parse(){
+            f1 = new Factor();
+            f1.parse();
+            //if the next token is a * then there is another term
+            if(s.get(loc + 1).equals("*")){
+                loc++;
+                currentToken = s.get(loc);
+                t1 = new Term();
+                t1.parse();
+            }
+        }
+        public int exec(){
+            int returnVal;
+            returnVal = f1.exec();
+            if(t1 != null){
+                returnVal = returnVal * t1.exec();
+            }
+            return returnVal;
+        }
+        public void print(){
+            f1.print();
+            if(t1 != null){
+                System.out.println("*");
+                t1.print();
+            }
 
         }
     }
 
-    //TODO Term
-    private class Term{
-        //TODO Parse
+    private class Factor{
+        private Const c1;
+        private Id i1;
+        private Expr e1;
+        private int opt;
+
+        public void parse(){
+            loc++;
+            currentToken = s.get(loc);
+            if(currentToken.substring(0,5).equals("CONST")){
+                opt = 1;
+                c1 = new Const();
+                c1.parse();
+            }else if(currentToken.substring(0,2).equals("ID")){
+                opt = 2;
+                i1 = new Id("FACTOR");
+                i1.parse();
+            }else{
+                opt = 3;
+                //consume paren
+                loc++;
+                currentToken = s.get(loc);
+                e1 = new Expr();
+                e1.parse();
+                //consume paren
+                loc++;
+                currentToken = s.get(loc);
+            }
+
+        }
+        public int exec(){
+            int returnVal;
+            if(opt == 1){
+               returnVal = c1.exec();
+            }else if(opt == 2){
+                returnVal = i1.exec();
+            }else{
+                returnVal = e1.exec();
+            }
+            return returnVal;
+        }
+        public void print(){
+            if(opt == 1){
+                c1.print();
+            }else if(opt == 2){
+                i1.print();
+            }else{
+                e1.print();
+            }
+        }
+    }
+
+    private class Const{
+
         public void parse(){
 
         }
-        //TODO Exec
-        public void exec(){
-
+        public int exec(){
+            return 0;
         }
-        //TODO Print
         public void print(){
 
         }
@@ -471,12 +577,16 @@ public class ParseTree {
                 symbolTable.put(name, null);
             }
         }
-        public void exec(){
+        public int exec(){
+            int returnVal = 0;
             if(caller.equals("INPUT")){
                 symbolTable.put(name,fs.nextInt());
-            }else if(caller.equals("OUTPUT")){
-                System.out.println(symbolTable.get(name));
+            }else if(caller.equals("DEC")){
+                //TODO Declerations were messing this up so this is here to catch calls to ID from decl
+            }else{
+                returnVal = symbolTable.get(name);
             }
+            return returnVal;
         }
         public void print(){
             System.out.println(name);
