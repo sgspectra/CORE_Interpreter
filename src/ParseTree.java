@@ -5,18 +5,21 @@ import java.io.*;
 public class ParseTree {
     //Parse tree will contain one instance of class program as root
     private Program p;
-    //Scanner that will supply tokens
-    private Lexscan s;
+    //ArrayList of Tokens
+    private ArrayList<String> s;
     //File Reader to access values
     private File fileName;
     private Scanner fs;
     //Variable to hold token from Scanner
     private String currentToken;
+    //Int to hold position in ArrayList
+    private int loc;
     //Symbol Table
     HashMap<String, Integer> symbolTable = new HashMap();
 
-    public ParseTree(Lexscan scannerIn, String inputValuesFile){
-        s = scannerIn;
+    public ParseTree(ArrayList<String> in, String inputValuesFile){
+        s = in;
+        loc = 0;
         p = new Program();
         fileName = new File(inputValuesFile);
         try {
@@ -30,6 +33,12 @@ public class ParseTree {
     public void parse(){
         p.parse();
     }
+    public void print(){
+        p.print();
+    }
+    public void exec(){
+        p.exec();
+    }
 
 
     private class Program{
@@ -42,7 +51,7 @@ public class ParseTree {
         }
 
         public void parse(){
-            currentToken = s.getNext();
+            currentToken = s.get(loc);
             //Check if first token is PROGRAM
             if (currentToken.equals("PROGRAM")){
                 //Print token to stdout
@@ -55,6 +64,8 @@ public class ParseTree {
                 System.out.println("ERROR: Expecting keyword PROGRAM");
             }
             //Check if the next token available is BEGIN
+            loc++;
+            currentToken = s.get(loc);
             if (currentToken.equals("BEGIN")){
                 //Print token to stdout
                 System.out.println(currentToken);
@@ -65,7 +76,8 @@ public class ParseTree {
                 System.out.println("ERROR: Expecting keyword BEGIN");
             }
             //Check for end token
-            currentToken = s.getNext();
+            loc++;
+            currentToken = s.get(loc);
             if (!currentToken.equals("END")){
                 System.out.println("ERROR: Expecting keyword END");
             }
@@ -99,8 +111,7 @@ public class ParseTree {
         public void parse(){
             d1 = new Decl();
             d1.parse();
-            //if the current token is not BEGIN parse another decseq
-            if (!currentToken.equals("BEGIN")){
+            if (!s.get(loc +1).equals("BEGIN")){
                 d2 = new DecSeq();
                 d2.parse();
             }
@@ -134,7 +145,7 @@ public class ParseTree {
             s1 = new Stmt();
             s1.parse();
             //if the current token is not END parse another StmtSeq
-            if (!currentToken.equals("END")){
+            if (!s.get(loc + 1).equals("END")){
                 s2 = new StmtSeq();
                 s2.parse();
             }
@@ -163,11 +174,15 @@ public class ParseTree {
 
         public void parse(){
             //check for keyword INT
-            currentToken = s.getNext();
+            loc++;
+            currentToken = s.get(loc);
             if (currentToken.equals("INT")){
-                i1 = new IdList();
+                i1 = new IdList("");
                 i1.parse();
             }
+            //consume the semicolon
+            loc++;
+            currentToken = s.get(loc);
 
         }
         public void exec(){
@@ -195,7 +210,8 @@ public class ParseTree {
         }
         //TODO Parse
         public void parse(){
-            currentToken = s.getNext();
+            loc++;
+            currentToken = s.get(loc);
             if(currentToken.indexOf('I') == 0 && currentToken.indexOf('D') == 1){
                 altNo = 1;
                 a1 = new Assign();
@@ -240,7 +256,7 @@ public class ParseTree {
             }
         }
     }
-    
+
     private class Assign{
         private Id i1;
         private Expr e1;
@@ -253,17 +269,19 @@ public class ParseTree {
 
         public void parse(){
             //current token should still be id token
-            i1 = new Id();
+            i1 = new Id("ASSIGN");
             i1.parse();
             // consume the assign token
-            currentToken = s.getNext();
+            loc++;
+            currentToken = s.get(loc);
             if(!currentToken.equals("ASSIGN")){
                 System.out.println("ERROR: Expected Assign Token");
             }
             e1 = new Expr();
             e1.parse();
             //consume the semilcolon
-            currentToken = s.getNext();
+            loc++;
+            currentToken = s.get(loc);
             if(!currentToken.equals("SEMICOLON")){
                 System.out.println("ERROR: Expected ;");
             }
@@ -282,22 +300,20 @@ public class ParseTree {
 
 
     private class In{
-        private Id i1;
+        private IdList i1;
 
         public void parse(){
-            //at this point the current token should be INPUT
-            //move it to the ID
-            currentToken = s.getNext();
-            i1 = new Id();
+            i1 = new IdList("INPUT");
             i1.parse();
             //consume the semicolon
-            currentToken = s.getNext();
+            loc++;
+            currentToken = s.get(loc);
             if(!currentToken.equals("SEMICOLON")){
                 System.out.println("ERROR: Expected ;");
             }
         }
         public void exec(){
-            i1.input(fs.nextInt());
+            i1.exec();
         }
         public void print(){
             System.out.println("input");
@@ -308,22 +324,70 @@ public class ParseTree {
 
     //TODO Out
     private class Out{
+        private Expr e1;
+
+        public Out(){
+            e1 = null;
+        }
+
         //TODO Parse
         public void parse(){
-
+            //at this point the current token should be OUTPUT
+            //move it to the expression
+            loc++;
+            currentToken = s.get(loc);
+            e1 = new Expr();
+            e1.parse();
+            //consume the semicolon
+            loc++;
+            currentToken = s.get(loc);
+            if(!currentToken.equals("SEMICOLON")){
+                System.out.println("ERROR: Expected ;");
+            }
         }
-        //TODO Exec
         public void exec(){
-
+            e1.exec();
         }
-        //TODO Print
         public void print(){
-
+            e1.print();
         }
     }
 
     //TODO Expr
     private class Expr{
+        private Term t1;
+        private Expr e1;
+
+        public Expr(){
+            t1 = null;
+            e1 = null;
+        }
+
+        //TODO Parse
+        public void parse(){
+            //first parse the term
+            t1 = new Term();
+            t1.parse();
+            //grab the next token
+            loc++;
+            currentToken = s.get(loc);
+            if(currentToken.equals("+") || currentToken.equals("-")){
+                e1 = new Expr();
+                e1.parse();
+            }
+        }
+        //TODO Exec
+        public void exec(){
+
+        }
+        //TODO Print
+        public void print(){
+
+        }
+    }
+
+    //TODO Term
+    private class Term{
         //TODO Parse
         public void parse(){
 
@@ -338,31 +402,37 @@ public class ParseTree {
         }
     }
 
-
     private class IdList{
         private Id i1;
         private IdList i2;
+        private String caller;
 
-        public IdList(){
+        public IdList(String call){
             i1 = null;
             i2 = null;
+            caller = call;
         }
 
         public void parse(){
             //grab the first id and parse it
-            currentToken = s.getNext();
+            loc++;
+            currentToken = s.get(loc);
             //check that it is an id token
             if(currentToken.indexOf('I')== 0 & currentToken.indexOf('D') == 1){
-                i1 = new Id();
+                i1 = new Id(caller);
                 i1.parse();
             }else{
                 System.out.println("ERROR: Expected ID token");
             }
             //grab the next token and check if it is a comma
-            currentToken = s.getNext();
+            loc++;
+            currentToken = s.get(loc);
             if (currentToken.equals("COMMA")){
-                i2 = new IdList();
+                i2 = new IdList(caller);
                 i2.parse();
+            }else{
+                loc--;
+                currentToken = s.get(loc);
             }
         }
 
@@ -384,9 +454,11 @@ public class ParseTree {
 
     private class Id{
         private String name;
+        private String caller;
 
-        public Id(){
+        public Id(String call){
             name = null;
+            caller = call;
         }
         public void parse(){
             //the parser currentToken value should hold the ID token at this point
@@ -399,14 +471,15 @@ public class ParseTree {
                 symbolTable.put(name, null);
             }
         }
-        public int exec(){
-            return symbolTable.get(name);
-        }
-        public void input(int in){
-            symbolTable.put(name, in);
+        public void exec(){
+            if(caller.equals("INPUT")){
+                symbolTable.put(name,fs.nextInt());
+            }else if(caller.equals("OUTPUT")){
+                System.out.println(symbolTable.get(name));
+            }
         }
         public void print(){
-            System.out.println(currentToken);
+            System.out.println(name);
         }
     }
 }

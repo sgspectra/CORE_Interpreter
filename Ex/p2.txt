@@ -1,0 +1,7 @@
+program
+int x;
+int y;
+begin
+input x;
+input y;
+end
