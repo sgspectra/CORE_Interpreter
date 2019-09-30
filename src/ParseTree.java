@@ -536,11 +536,13 @@ public class ParseTree {
             value = Integer.parseInt(currentToken.substring(6,currentToken.length()-1));
         }
         public int exec(){
-            //look for the ID in the symbol table and update
-            if(symbolTable.containsKey(assignmentId.substring(3, assignmentId.length()-1))){
-                symbolTable.put(assignmentId.substring(3,assignmentId.length()-1), value);
-            }else{
-                System.out.println("Error ID " + assignmentId + " does not exist in symbol table");
+            //look for the ID in the symbol table and update if it is being assigned
+            if(!assignmentId.equals("")) {
+                if (symbolTable.containsKey(assignmentId.substring(3, assignmentId.length() - 1))) {
+                    symbolTable.put(assignmentId.substring(3, assignmentId.length() - 1), value);
+                } else {
+                    System.out.println("Error ID " + assignmentId + " does not exist in symbol table");
+                }
             }
             return value;
         }
