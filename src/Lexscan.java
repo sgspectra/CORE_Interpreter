@@ -164,6 +164,11 @@ public class Lexscan {
         else if(ch == -1){
             out = "EOF";
         }
+        //check if string should be a const
+        else if(Character.isDigit(out.charAt(0))){
+            String tokenize = "CONST[" + out + "]";
+            out = tokenize;
+        }
         else{
             String tokenize = "ID[" + out + "]";
             out = tokenize;

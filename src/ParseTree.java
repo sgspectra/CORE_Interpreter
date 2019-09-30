@@ -260,6 +260,7 @@ public class ParseTree {
     private class Assign{
         private Id i1;
         private Expr e1;
+        private String idName;
 
         //constructor
         public Assign(){
@@ -269,6 +270,8 @@ public class ParseTree {
 
         public void parse(){
             //current token should still be id token
+            //grab name
+            idName = currentToken.substring(3, currentToken.length()-1);
             i1 = new Id("ASSIGN");
             i1.parse();
             // consume the assign token
@@ -277,7 +280,8 @@ public class ParseTree {
             if(!currentToken.equals("ASSIGN")){
                 System.out.println("ERROR: Expected Assign Token");
             }
-            e1 = new Expr();
+            //pass the expression the ID being  assigned
+            e1 = new Expr(s.get(loc-1));
             e1.parse();
             //consume the semilcolon
             loc++;
@@ -288,7 +292,7 @@ public class ParseTree {
         }
         public void exec(){
             i1.exec();
-            e1.exec();
+            symbolTable.put(idName, e1.exec());
         }
         public void print(){
             i1.print();
@@ -331,7 +335,7 @@ public class ParseTree {
         public void parse(){
             //at this point the current token should be OUTPUT
             //move it to the expression
-            e1 = new Expr();
+            e1 = new Expr("");
             e1.parse();
             //consume the semicolon
             loc++;
@@ -355,29 +359,31 @@ public class ParseTree {
         private int plusMinus;
         private Term t1;
         private Expr e1;
+        private String id;
 
-        public Expr(){
+        public Expr(String assId){
             t1 = null;
             e1 = null;
             plusMinus = 0;
+            id = assId;
         }
 
 
         public void parse(){
             //first parse the term
-            t1 = new Term();
+            t1 = new Term(id);
             t1.parse();
             //looks at next token
             if(s.get(loc+1).equals("+")){
                 loc++;
                 currentToken = s.get(loc);
-                e1 = new Expr();
+                e1 = new Expr("");
                 e1.parse();
                 plusMinus = 1;
             }else if(s.get(loc+1).equals("-")){
                 loc++;
                 currentToken = s.get(loc);
-                e1 = new Expr();
+                e1 = new Expr("");
                 e1.parse();
                 plusMinus = 2;
             }
@@ -408,20 +414,22 @@ public class ParseTree {
     private class Term{
         private Factor f1;
         private Term t1;
+        private String id;
 
-        public Term(){
+        public Term(String assId){
             f1 = null;
             t1 = null;
+            id = assId;
         }
 
         public void parse(){
-            f1 = new Factor();
+            f1 = new Factor(id);
             f1.parse();
             //if the next token is a * then there is another term
             if(s.get(loc + 1).equals("*")){
                 loc++;
                 currentToken = s.get(loc);
-                t1 = new Term();
+                t1 = new Term("");
                 t1.parse();
             }
         }
@@ -445,16 +453,24 @@ public class ParseTree {
 
     private class Factor{
         private Const c1;
+        private String assignmentId;
         private Id i1;
         private Expr e1;
         private int opt;
+
+        public Factor(String assId){
+            c1 = null;
+            assignmentId = assId;
+            i1 = null;
+            e1 = null;
+        }
 
         public void parse(){
             loc++;
             currentToken = s.get(loc);
             if(currentToken.substring(0,5).equals("CONST")){
                 opt = 1;
-                c1 = new Const();
+                c1 = new Const(assignmentId);
                 c1.parse();
             }else if(currentToken.substring(0,2).equals("ID")){
                 opt = 2;
@@ -465,7 +481,7 @@ public class ParseTree {
                 //consume paren
                 loc++;
                 currentToken = s.get(loc);
-                e1 = new Expr();
+                e1 = new Expr("");
                 e1.parse();
                 //consume paren
                 loc++;
@@ -496,15 +512,29 @@ public class ParseTree {
     }
 
     private class Const{
+        private int value;
+        private String assignmentId;
+
+        public Const(String assId){
+            assignmentId = assId;
+        }
 
         public void parse(){
-
+            //current token should be the const token so we can grab the substring that
+            //represents the value of the actual const
+            value = Integer.parseInt(currentToken.substring(6,currentToken.length()-1));
         }
         public int exec(){
-            return 0;
+            //look for the ID in the symbol table and update
+            if(symbolTable.containsKey(assignmentId.substring(3, assignmentId.length()-1))){
+                symbolTable.put(assignmentId.substring(3,assignmentId.length()-1), value);
+            }else{
+                System.out.println("Error ID " + assignmentId + " does not exist in symbol table");
+            }
+            return value;
         }
         public void print(){
-
+            System.out.println(value);
         }
     }
 
@@ -583,6 +613,8 @@ public class ParseTree {
                 symbolTable.put(name,fs.nextInt());
             }else if(caller.equals("DEC")){
                 //TODO Declerations were messing this up so this is here to catch calls to ID from decl
+            }else if(caller.equals("ASSIGN")){
+                //if being called in assign do nothing?
             }else{
                 returnVal = symbolTable.get(name);
             }
@@ -592,4 +624,5 @@ public class ParseTree {
             System.out.println(name);
         }
     }
+
 }

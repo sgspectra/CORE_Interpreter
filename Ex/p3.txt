@@ -1,0 +1,8 @@
+program
+int x;
+int y;
+begin
+x:=100;
+y:=x;
+output y;
+end
