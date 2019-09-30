@@ -199,6 +199,7 @@ public class ParseTree {
         private In i1;
         private Out o1;
         private If if1;
+        private Loop l1;
 
         public Stmt(){
             altNo = -1;
@@ -206,6 +207,7 @@ public class ParseTree {
             i1 = null;
             o1 = null;
             if1= null;
+            l1 = null;
         }
         //TODO Parse
         public void parse(){
@@ -227,6 +229,10 @@ public class ParseTree {
                 altNo = 4;
                 if1 = new If();
                 if1.parse();
+            }else if(currentToken.equals("WHILE")){
+                altNo = 5;
+                l1 = new Loop();
+                l1.parse();
             }
 
             else{
@@ -247,6 +253,9 @@ public class ParseTree {
                 case 4:
                     if1.exec();
                     break;
+                case 5:
+                    l1.exec();
+                    break;
             }
         }
         //TODO Print
@@ -263,6 +272,9 @@ public class ParseTree {
                     break;
                 case 4:
                     if1.print();
+                    break;
+                case 5:
+                    l1.print();
                     break;
             }
         }
@@ -855,6 +867,55 @@ public class ParseTree {
                     System.out.println("Warning: CMPR took default case is switch (print)");
                     break;
             }
+        }
+    }
+
+    private class Loop{
+        private Cond cond1;
+        private StmtSeq s1;
+
+        public Loop(){
+            cond1 = null;
+            s1 = null;
+        }
+
+        private void parse(){
+            //current token should be WHILE
+            cond1 = new Cond();
+            cond1.parse();
+            //check for begin
+            loc++;
+            currentToken = s.get(loc);
+            if(!currentToken.equals("BEGIN")){
+                System.out.println("ERROR: Expected BEGIN");
+            }
+            s1 = new StmtSeq();
+            s1.parse();
+            //grab endwhile and check
+            loc++;
+            currentToken = s.get(loc);
+            if(!currentToken.equals("ENDWHILE")){
+                System.out.println("ERROR: Expected ENDWHILE");
+            }
+            //grab the semicolon and check it
+            loc++;
+            currentToken = s.get(loc);
+            if(!currentToken.equals("SEMICOLON")){
+                System.out.println("ERROR: Expected ;");
+            }
+        }
+        private void exec(){
+            while(cond1.exec()){
+                s1.exec();
+            }
+        }
+        private void print(){
+            System.out.println("while");
+            cond1.print();
+            System.out.println("begin");
+            s1.print();
+            System.out.println("endif");
+            System.out.println(";");
         }
     }
 
