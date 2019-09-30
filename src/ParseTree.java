@@ -1,3 +1,5 @@
+import com.sun.org.apache.xpath.internal.operations.Bool;
+
 import java.util.HashMap;
 import java.util.*;
 import java.io.*;
@@ -54,9 +56,6 @@ public class ParseTree {
             currentToken = s.get(loc);
             //Check if first token is PROGRAM
             if (currentToken.equals("PROGRAM")){
-                //Print token to stdout
-                //TODO remove print stmnt
-                System.out.println(currentToken);
                 //create declaration statement and parse it
                 d1 = new DecSeq();
                 d1.parse();
@@ -75,9 +74,7 @@ public class ParseTree {
             }else{
                 System.out.println("ERROR: Expecting keyword BEGIN");
             }
-            //Check for end token
-            loc++;
-            currentToken = s.get(loc);
+            //current token should be at END token
             if (!currentToken.equals("END")){
                 System.out.println("ERROR: Expecting keyword END");
             }
@@ -144,8 +141,8 @@ public class ParseTree {
         public void parse(){
             s1 = new Stmt();
             s1.parse();
-            //if the current token is not END parse another StmtSeq
-            if (!s.get(loc + 1).equals("END")){
+            //if the next token is not END parse another StmtSeq
+            if (!(s.get(loc+1).equals("END") || s.get(loc+1).equals("ENDIF") || s.get(loc+1).equals("ENDWHILE"))){
                 s2 = new StmtSeq();
                 s2.parse();
             }
@@ -201,12 +198,14 @@ public class ParseTree {
         private Assign a1;
         private In i1;
         private Out o1;
+        private If if1;
 
         public Stmt(){
             altNo = -1;
             a1 = null;
             i1 = null;
             o1 = null;
+            if1= null;
         }
         //TODO Parse
         public void parse(){
@@ -224,7 +223,13 @@ public class ParseTree {
                 altNo = 3;
                 o1 = new Out();
                 o1.parse();
-            }else{
+            }else if(currentToken.equals("IF")){
+                altNo = 4;
+                if1 = new If();
+                if1.parse();
+            }
+
+            else{
                 System.out.println("ERROR: Invalid Statement Token");
             }
         }
@@ -239,6 +244,9 @@ public class ParseTree {
                 case 3:
                     o1.exec();
                     break;
+                case 4:
+                    if1.exec();
+                    break;
             }
         }
         //TODO Print
@@ -252,6 +260,9 @@ public class ParseTree {
                     break;
                 case 3:
                     o1.print();
+                    break;
+                case 4:
+                    if1.print();
                     break;
             }
         }
@@ -600,8 +611,6 @@ public class ParseTree {
             //the parser currentToken value should hold the ID token at this point
             //use this value to get the name of the ID
             name = currentToken.substring(3,currentToken.length()-1);
-            //TODO remove this print
-            System.out.println("ID[" + name + "]");
             //add to the symbol table if its not there
             if(!symbolTable.containsKey(name)) {
                 symbolTable.put(name, null);
@@ -622,6 +631,228 @@ public class ParseTree {
         }
         public void print(){
             System.out.println(name);
+        }
+    }
+
+    private class If{
+        private Cond c1;
+        private StmtSeq s1;
+        private StmtSeq s2;
+
+        public If(){
+            c1 = null;
+            s1 = null;
+            s2 = null;
+        }
+
+        private void parse(){
+            //current token should be IF here during parse
+            //parse the condition
+            c1 = new Cond();
+            c1.parse();
+            //move to "THEN" token
+            loc++;
+            currentToken = s.get(loc);
+            s1 = new StmtSeq();
+            s1.parse();
+            //get next token and check it is either endif or else
+            loc++;
+            currentToken = s.get(loc);
+            if(currentToken.equals("ENDIF")){
+                //grab the semicolon
+                loc++;
+                currentToken = s.get(loc);
+            }else if(currentToken.equals("ELSE")){
+                s2 = new StmtSeq();
+                s2.parse();
+                //check for endif
+                loc++;
+                currentToken = s.get(loc);
+                if(!currentToken.equals("ENDIF")){
+                    System.out.println("ERROR: Expected ENDWHILE token.");
+                }
+                //grab semicolon
+                loc++;
+                currentToken = s.get(loc);
+            }
+        }
+        private void exec(){
+            if(c1.exec()){
+                s1.exec();
+            }else{
+                if(s2 != null){
+                    s2.exec();
+                }
+            }
+
+        }
+        private void print(){
+            System.out.println("if");
+            c1.print();
+            System.out.println("then");
+            s1.print();
+            if(s2 != null){
+                System.out.println("else");
+                s2.print();
+            }
+        }
+    }
+
+    private class Cond{
+        private Cmpr cmpr1;
+        private Cond cond1;
+        private int opt;
+
+        public Cond(){
+            cmpr1 = null;
+            cond1 = null;
+        }
+
+        private void parse(){
+            //right now token should still be if, look ahead one to see if there is a ! token
+            if(!s.get(loc+1).equals("!")){
+                opt = 1;
+                //if it isn't we can grab first comp
+                cmpr1 = new Cmpr();
+                cmpr1.parse();
+                //check to see if the next token is or
+                if(s.get(loc+1).equals("OR")){
+                    opt = 2;
+                    //if it is or we need to parse another cond
+                    cond1 = new Cond();
+                    cond1.parse();
+                }
+            }else{
+                //if it does equal ! consume
+                opt = 3;
+                loc++;
+                currentToken = s.get(loc);
+                //check for paren
+                loc++;
+                currentToken = s.get(loc);
+                if(!currentToken.equals("(")){
+                    System.out.println("ERROR: Expected Open Paren");
+                }
+                cond1 = new Cond();
+                cond1.parse();
+                //check for paren
+                loc++;
+                currentToken = s.get(loc);
+                if(!currentToken.equals(")")){
+                    System.out.println("ERROR: Expected Close Paren");
+                }
+            }
+        }
+        private Boolean exec(){
+            Boolean retVal;
+            switch (opt){
+                case 1:
+                    retVal =  cmpr1.exec();
+                    break;
+                case 2:
+                    retVal = (cmpr1.exec() || cond1.exec());
+                    break;
+                case 3:
+                    retVal = !cond1.exec();
+                    break;
+                default:
+                    //todo remove this warning
+                    System.out.println("Warning: COND took default in case switch");
+                    retVal = false;
+            }
+            return retVal;
+        }
+        private void print(){
+            switch (opt){
+                case 1:
+                    cmpr1.print();
+                    break;
+                case 2:
+                    cmpr1.print();
+                    System.out.println("or");
+                    cond1.print();
+                    break;
+                case 3:
+                    System.out.println("!");
+                    System.out.println("(");
+                    cond1.print();
+                    System.out.println(")");
+                    break;
+                default:
+                    System.out.println("Warning: COND took default in case switch (print)");
+            }
+        }
+    }
+
+    private class Cmpr{
+        private Expr e1;
+        private Expr e2;
+        private int opt;
+
+        public Cmpr(){
+            e1 = null;
+            e2 = null;
+        }
+
+        private void parse(){
+            //grab the first expression and parse
+            e1 = new Expr("");
+            e1.parse();
+            //check what the next token is
+            loc++;
+            currentToken = s.get(loc);
+            if(currentToken.equals("=")){
+                opt = 1;
+            }else if(currentToken.equals("<")){
+                opt = 2;
+            }else if(currentToken.equals("<=")){
+                opt = 3;
+            }else{
+                System.out.println("ERROR: Invalid CMPR, expected =, <, <=");
+            }
+            e2 = new Expr("");
+            e2.parse();
+        }
+        private Boolean exec(){
+            Boolean retVal;
+            switch (opt){
+                case 1:
+                    retVal = e1.exec() == e2.exec();
+                    break;
+                case 2:
+                    retVal = e1.exec() < e2.exec();
+                    break;
+                case 3:
+                    retVal = e1.exec() <= e2.exec();
+                    break;
+                default:
+                    System.out.println("Warning: CMPR took default case is switch (exec)");
+                    retVal = false;
+                    break;
+            }
+            return retVal;
+        }
+        private void print(){
+            switch (opt){
+                case 1:
+                    e1.print();
+                    System.out.println("=");
+                    e2.print();
+                    break;
+                case 2:
+                    e1.print();
+                    System.out.println("<");
+                    e2.print();
+                    break;
+                case 3:
+                    e1.print();
+                    System.out.println("<=");
+                    e2.print();
+                    break;
+                default:
+                    System.out.println("Warning: CMPR took default case is switch (print)");
+                    break;
+            }
         }
     }
 
