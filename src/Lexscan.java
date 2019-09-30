@@ -164,6 +164,16 @@ public class Lexscan {
         else if(ch == -1){
             out = "EOF";
         }
+        //check for case
+        else if(out.equals("case")){
+            out = "CASE";
+        }
+        else if(out.equals("id")){
+            out = "ID";
+        }
+        else if(out.equals("of")){
+            out = "OF";
+        }
         //check if string should be a const
         else if(Character.isDigit(out.charAt(0))){
             String tokenize = "CONST[" + out + "]";

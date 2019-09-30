@@ -191,15 +191,14 @@ public class ParseTree {
         }
     }
 
-    //TODO Stmt
     private class Stmt{
-        //TODO add other statement types
         private int altNo;
         private Assign a1;
         private In i1;
         private Out o1;
         private If if1;
         private Loop l1;
+        private Case c1;
 
         public Stmt(){
             altNo = -1;
@@ -208,8 +207,8 @@ public class ParseTree {
             o1 = null;
             if1= null;
             l1 = null;
+            c1 = null;
         }
-        //TODO Parse
         public void parse(){
             loc++;
             currentToken = s.get(loc);
@@ -233,6 +232,10 @@ public class ParseTree {
                 altNo = 5;
                 l1 = new Loop();
                 l1.parse();
+            }else if(currentToken.equals("CASE")){
+                altNo = 6;
+                c1 = new Case();
+                c1.parse();
             }
 
             else{
@@ -256,9 +259,11 @@ public class ParseTree {
                 case 5:
                     l1.exec();
                     break;
+                case 6:
+                    c1.exec();
+                    break;
             }
         }
-        //TODO Print
         public void print(){
             switch (altNo){
                 case 1:
@@ -275,6 +280,9 @@ public class ParseTree {
                     break;
                 case 5:
                     l1.print();
+                    break;
+                case 6:
+                    c1.print();
                     break;
             }
         }
@@ -638,7 +646,10 @@ public class ParseTree {
                 //TODO Declerations were messing this up so this is here to catch calls to ID from decl
             }else if(caller.equals("ASSIGN")){
                 //if being called in assign do nothing?
-            }else{
+            }else if(caller.equals("CASE")){
+                //if being called by CASE
+            }
+            else{
                 returnVal = symbolTable.get(name);
             }
             return returnVal;
@@ -916,6 +927,182 @@ public class ParseTree {
             s1.print();
             System.out.println("endif");
             System.out.println(";");
+        }
+    }
+
+    private class Case{
+        private CaseLine caseLine1;
+        private Expr e1;
+        private Id id1;
+
+        public Case(){
+            caseLine1 = null;
+            e1 = null;
+            id1 = null;
+        }
+
+        private void parse(){
+            //at this point the current token should be CASE
+            //grab next token and check ID
+            id1 = new Id("CASE");
+            id1.parse();
+            //grab next token and check OF
+            loc++;
+            currentToken = s.get(loc);
+            if(!currentToken.equals("OF")){
+                System.out.println("ERROR: Expected token OF");
+            }
+            caseLine1 = new CaseLine();
+            caseLine1.parse();
+            //check for else
+            loc++;
+            currentToken = s.get(loc);
+            if(!currentToken.equals("ELSE")){
+                System.out.println("ERROR: Expected token ELSE");
+            }
+            e1 = new Expr("");
+            e1.parse();
+            //check for END
+            loc++;
+            currentToken = s.get(loc);
+            if(!currentToken.equals("END")){
+                System.out.println("ERROR: Expected token END");
+            }
+            //grab the semicolon
+            loc++;
+            currentToken = s.get(loc);
+            if(!currentToken.equals(";")){
+                System.out.println("ERROR: Expected ;");
+            }
+        }
+        private void exec(){
+            String caseId = id1.name;
+            //pass the id name into exec for caseline
+            if(!(caseLine1.exec(caseId))){
+                symbolTable.put(caseId, e1.exec());
+            }
+        }
+        private void print(){
+            //todo print statement for case
+        }
+    }
+
+    private class CaseLine{
+        private Const const1;
+        private ConstList constList1;
+        private Expr e1;
+        private CaseLineFollow clf1;
+        private int valToMatch;
+
+        public CaseLine(){
+            const1 = null;
+            constList1 = null;
+            e1 = null;
+            clf1 = null;
+        }
+
+        private void parse(){
+            //create the first constant in the list
+            const1 = new Const("");
+            const1.parse();
+            //next grab the const list, this could be empty set so leave as NULL if no values?
+            constList1 = new ConstList();
+            constList1.parse();
+            //check for the colon
+            loc++;
+            currentToken = s.get(loc);
+            if(!currentToken.equals("COLON")){
+                System.out.println("ERROR: Expected token :");
+            }
+            //create and parse the expression
+            e1 = new Expr("");
+            e1.parse();
+            //create and parse the case-line-follow, might be empty, leave as null if empty
+            clf1 = new CaseLineFollow();
+            clf1.parse();
+        }
+        /* @param vtm vtm is the value that you want to match in the various case lines
+        *  @return the Expr object that matches the vtm or null if there isn't one */
+        private boolean exec(String vtm){
+            boolean retVal = false;
+            if(const1.exec() == symbolTable.get(vtm)){
+                //change the value of vtm in the symbol table
+                symbolTable.put(vtm, e1.exec());
+                retVal = true;
+            }
+            if(constList1 != null){
+                if(constList1.exec(vtm)){
+                    //set the value of vtm
+                    symbolTable.put(vtm, e1.exec());
+                    retVal = true;
+                }
+            }
+            if(clf1.exec(vtm)){
+                retVal = true;
+            }
+            return retVal;
+        }
+        private void print(){
+            //todo print function for case-line
+        }
+    }
+
+    private class ConstList{
+        private Const c1;
+        private ConstList cl1;
+
+        public ConstList(){
+            c1 = null;
+            cl1 = null;
+        }
+
+        private void parse(){
+            //check to see if the next value is a comma
+            if(s.get(loc+1).equals(",")){
+                //if it is comma consume the comma
+                loc++;
+                currentToken = s.get(loc);
+                if(!currentToken.equals("COMMA")){
+                    System.out.println("ERROR: Expected token ,");
+                }
+                c1 = new Const("");
+                c1.parse();
+                cl1 = new ConstList();
+                cl1.parse();
+            }
+            //if it wasn't a comma leave all the local variable for ConstList Null
+        }
+        private boolean exec(String vtm){
+            boolean retVal = false;
+            if(c1.exec() == symbolTable.get(vtm)){
+                retVal = true;
+            }
+            if (cl1 != null){
+                return cl1.exec(vtm);
+            }
+            return retVal;
+        }
+        private void print(){
+        //todo print function for const-list
+        }
+    }
+
+    private class CaseLineFollow{
+        private Expr e1;
+        private CaseLine cl1;
+
+        private void parse(){
+        //todo fill out the parse for case-line-follow
+        }
+        private boolean exec(String vtm){
+            boolean retVal = false;
+            if(cl1 != null){
+                retVal = cl1.exec(vtm);
+            }
+            return retVal;
+        }
+        private void print(){
+        //todo print function for case-line-follow
         }
     }
 
