@@ -648,7 +648,7 @@ public class ParseTree {
         public void print(){
             i1.print();
             if (i2 != null){
-                System.out.println("COMMA");
+                System.out.print(",");
                 i2.print();
             }
         }
