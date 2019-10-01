@@ -676,7 +676,7 @@ public class ParseTree {
             if(caller.equals("INPUT")){
                 symbolTable.put(name,fs.nextInt());
             }else if(caller.equals("DEC")){
-                //TODO Declerations were messing this up so this is here to catch calls to ID from decl
+                //Declerations were messing this up so this is here to catch calls to ID from decl
             }else if(caller.equals("ASSIGN")){
                 //if being called in assign do nothing?
             }else if(caller.equals("CASE")){
@@ -1029,13 +1029,18 @@ public class ParseTree {
             }
         }
         private void print(){
-            System.out.println("case");
+            System.out.print("case ");
             id1.print();
-            System.out.println("of");
+            System.out.println(" of");
+            ind();
             caseLine1.print();
-            System.out.println("else");
+            unind();
+            System.out.println();
+            System.out.println("  else");
+            ind();
             e1.print();
-            System.out.println("end");
+            System.out.println();
+            System.out.print("  end");
             System.out.println(";");
         }
     }
@@ -1101,7 +1106,7 @@ public class ParseTree {
         private void print(){
             const1.print();
             constList1.print();
-            System.out.println(":");
+            System.out.print(" : ");
             e1.print();
             clf1.print();
         }
@@ -1150,7 +1155,7 @@ public class ParseTree {
         }
         private void print(){
             if(c1 != null){
-                System.out.println(",");
+                System.out.print(",");
                 c1.print();
                 cl1.print();
             }
@@ -1181,7 +1186,8 @@ public class ParseTree {
         }
         private void print(){
             if(cl1 != null){
-                System.out.println("|");
+                System.out.println();
+                System.out.print("    | ");
                 cl1.print();
             }
         }
