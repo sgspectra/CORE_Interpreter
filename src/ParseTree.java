@@ -16,6 +16,8 @@ public class ParseTree {
     private int loc;
     //Symbol Table
     private HashMap<String, Integer> symbolTable = new HashMap<String, Integer>();
+    //Indent
+    String indent = "";
 
     public ParseTree(ArrayList<String> in, String inputValuesFile){
         s = in;
@@ -28,6 +30,16 @@ public class ParseTree {
             e.printStackTrace();
         }
         currentToken = "";
+    }
+
+    private void ind(){
+        indent = indent.concat("  ");
+        System.out.print(indent);
+    }
+    private void unind(){
+        if(indent.length()>0){
+            indent = indent.substring(2);
+        }
     }
 
     public void parse(){
@@ -80,12 +92,10 @@ public class ParseTree {
                 System.exit(0);
             }
         }
-
         public void exec(){
             d1.exec();
             s1.exec();
         }
-
         public void print(){
             System.out.println("program");
             d1.print();
@@ -143,7 +153,7 @@ public class ParseTree {
             s1 = new Stmt();
             s1.parse();
             //if the next token is not END parse another StmtSeq
-            if (!(s.get(loc+1).equals("END") || s.get(loc+1).equals("ENDIF") || s.get(loc+1).equals("ENDWHILE"))){
+            if (!(s.get(loc+1).equals("END") || s.get(loc+1).equals("ENDIF") || s.get(loc+1).equals("ENDWHILE") || s.get(loc+1).equals("ELSE"))){
                 s2 = new StmtSeq();
                 s2.parse();
             }
@@ -187,8 +197,11 @@ public class ParseTree {
             i1.exec();
         }
         public void print(){
-            System.out.println("int");
+            ind();
+            System.out.print("int ");
             i1.print();
+            System.out.println(";");
+            unind();
         }
     }
 
@@ -269,22 +282,34 @@ public class ParseTree {
         public void print(){
             switch (altNo){
                 case 1:
+                    ind();
                     a1.print();
+                    unind();
                     break;
                 case 2:
+                    ind();
                     i1.print();
+                    unind();
                     break;
                 case 3:
+                    ind();
                     o1.print();
+                    unind();
                     break;
                 case 4:
+                    ind();
                     if1.print();
+                    unind();
                     break;
                 case 5:
+                    ind();
                     l1.print();
+                    unind();
                     break;
                 case 6:
+                    ind();
                     c1.print();
+                    unind();
                     break;
             }
         }
@@ -331,7 +356,7 @@ public class ParseTree {
         }
         public void print(){
             i1.print();
-            System.out.println(":=");
+            System.out.print(":=");
             e1.print();
             System.out.println(";");
         }
@@ -355,7 +380,7 @@ public class ParseTree {
             i1.exec();
         }
         public void print(){
-            System.out.println("input");
+            System.out.print("input ");
             i1.print();
             System.out.println(";");
         }
@@ -385,7 +410,7 @@ public class ParseTree {
             System.out.println(e1.exec());
         }
         public void print(){
-            System.out.println("output");
+            System.out.print("output ");
             e1.print();
             System.out.println(";");
         }
@@ -438,11 +463,11 @@ public class ParseTree {
         public void print(){
             t1.print();
             if((e1 != null) && plusMinus == 1){
-                System.out.println("+");
+                System.out.print("+");
                 e1.print();
             }
             if((e1 != null) && plusMinus == 2){
-                System.out.println("-");
+                System.out.print("-");
                 e1.print();
             }
         }
@@ -574,7 +599,7 @@ public class ParseTree {
             return value;
         }
         public void print(){
-            System.out.println(value);
+            System.out.print(value);
         }
     }
 
@@ -663,7 +688,7 @@ public class ParseTree {
             return returnVal;
         }
         public void print(){
-            System.out.println(name);
+            System.out.print(name);
         }
     }
 
@@ -721,12 +746,12 @@ public class ParseTree {
 
         }
         private void print(){
-            System.out.println("if");
+            System.out.print("if ");
             c1.print();
-            System.out.println("then");
+            System.out.println(" then");
             s1.print();
             if(s2 != null){
-                System.out.println("else");
+                System.out.println("  else");
                 s2.print();
             }
         }
@@ -873,17 +898,17 @@ public class ParseTree {
             switch (opt){
                 case 1:
                     e1.print();
-                    System.out.println("=");
+                    System.out.print("=");
                     e2.print();
                     break;
                 case 2:
                     e1.print();
-                    System.out.println("<");
+                    System.out.print("<");
                     e2.print();
                     break;
                 case 3:
                     e1.print();
-                    System.out.println("<=");
+                    System.out.print("<=");
                     e2.print();
                     break;
                 default:
@@ -936,11 +961,11 @@ public class ParseTree {
             }
         }
         private void print(){
-            System.out.println("while");
+            System.out.print("while ");
             cond1.print();
-            System.out.println("begin");
+            System.out.println(" begin");
             s1.print();
-            System.out.println("endif");
+            System.out.print("  endwhile");
             System.out.println(";");
         }
     }

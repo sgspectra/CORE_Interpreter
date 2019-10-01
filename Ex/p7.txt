@@ -1,0 +1,10 @@
+program
+int x;
+int y;
+int z;
+begin
+z:=10;
+y:=13;
+if z<=y then x:=9; else x:=2; endif;
+output x;
+end
