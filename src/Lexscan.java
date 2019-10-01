@@ -174,6 +174,9 @@ public class Lexscan {
         else if(out.equals("of")){
             out = "OF";
         }
+        else if(out.equals("else")){
+            out = "ELSE";
+        }
         //check if string should be a const
         else if(Character.isDigit(out.charAt(0))){
             String tokenize = "CONST[" + out + "]";

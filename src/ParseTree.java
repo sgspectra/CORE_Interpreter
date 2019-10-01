@@ -66,8 +66,6 @@ public class ParseTree {
             loc++;
             currentToken = s.get(loc);
             if (currentToken.equals("BEGIN")){
-                //Print token to stdout
-                System.out.println(currentToken);
                 //create statement sequence and parse it
                 s1 = new StmtSeq();
                 s1.parse();
@@ -75,6 +73,8 @@ public class ParseTree {
                 System.out.println("ERROR: Expecting keyword BEGIN");
             }
             //current token should be at END token
+            loc++;
+            currentToken = s.get(loc);
             if (!currentToken.equals("END")){
                 System.out.println("ERROR: Expecting keyword END");
             }
@@ -944,6 +944,8 @@ public class ParseTree {
         private void parse(){
             //at this point the current token should be CASE
             //grab next token and check ID
+            loc++;
+            currentToken = s.get(loc);
             id1 = new Id("CASE");
             id1.parse();
             //grab next token and check OF
@@ -971,7 +973,7 @@ public class ParseTree {
             //grab the semicolon
             loc++;
             currentToken = s.get(loc);
-            if(!currentToken.equals(";")){
+            if(!currentToken.equals("SEMICOLON")){
                 System.out.println("ERROR: Expected ;");
             }
         }
@@ -983,7 +985,14 @@ public class ParseTree {
             }
         }
         private void print(){
-            //todo print statement for case
+            System.out.println("case");
+            id1.print();
+            System.out.println("of");
+            caseLine1.print();
+            System.out.println("else");
+            e1.print();
+            System.out.println("end");
+            System.out.println(";");
         }
     }
 
@@ -1003,6 +1012,9 @@ public class ParseTree {
 
         private void parse(){
             //create the first constant in the list
+            //move token to the constant
+            loc++;
+            currentToken = s.get(loc);
             const1 = new Const("");
             const1.parse();
             //next grab the const list, this could be empty set so leave as NULL if no values?
@@ -1021,8 +1033,7 @@ public class ParseTree {
             clf1 = new CaseLineFollow();
             clf1.parse();
         }
-        /* @param vtm vtm is the value that you want to match in the various case lines
-        *  @return the Expr object that matches the vtm or null if there isn't one */
+        /* @param vtm vtm is the id that you want to match in the case*/
         private boolean exec(String vtm){
             boolean retVal = false;
             if(const1.exec() == symbolTable.get(vtm)){
@@ -1043,7 +1054,11 @@ public class ParseTree {
             return retVal;
         }
         private void print(){
-            //todo print function for case-line
+            const1.print();
+            constList1.print();
+            System.out.println(":");
+            e1.print();
+            clf1.print();
         }
     }
 
@@ -1058,13 +1073,16 @@ public class ParseTree {
 
         private void parse(){
             //check to see if the next value is a comma
-            if(s.get(loc+1).equals(",")){
+            if(s.get(loc+1).equals("COMMA")){
                 //if it is comma consume the comma
                 loc++;
                 currentToken = s.get(loc);
                 if(!currentToken.equals("COMMA")){
                     System.out.println("ERROR: Expected token ,");
                 }
+                //move to next const
+                loc++;
+                currentToken = s.get(loc);
                 c1 = new Const("");
                 c1.parse();
                 cl1 = new ConstList();
@@ -1074,8 +1092,10 @@ public class ParseTree {
         }
         private boolean exec(String vtm){
             boolean retVal = false;
-            if(c1.exec() == symbolTable.get(vtm)){
-                retVal = true;
+            if(c1 != null) {
+                if (c1.exec() == symbolTable.get(vtm)) {
+                    retVal = true;
+                }
             }
             if (cl1 != null){
                 return cl1.exec(vtm);
@@ -1083,7 +1103,11 @@ public class ParseTree {
             return retVal;
         }
         private void print(){
-        //todo print function for const-list
+            if(c1 != null){
+                System.out.println(",");
+                c1.print();
+                cl1.print();
+            }
         }
     }
 
@@ -1092,7 +1116,15 @@ public class ParseTree {
         private CaseLine cl1;
 
         private void parse(){
-        //todo fill out the parse for case-line-follow
+            //look ahead for BAR
+            if(s.get(loc+1).equals("BAR")){
+                //consume BAR
+                loc++;
+                currentToken = s.get(loc);
+                cl1 = new CaseLine();
+                cl1.parse();
+            }
+
         }
         private boolean exec(String vtm){
             boolean retVal = false;
@@ -1102,7 +1134,10 @@ public class ParseTree {
             return retVal;
         }
         private void print(){
-        //todo print function for case-line-follow
+            if(cl1 != null){
+                System.out.println("|");
+                cl1.print();
+            }
         }
     }
 
