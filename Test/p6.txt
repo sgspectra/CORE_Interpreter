@@ -1,0 +1,12 @@
+program
+int x,y;
+begin
+x:=9;
+case x of
+    1,2 : 7 | 4 : 10 | 9,10 : x+1
+    else
+    8
+end;
+output y;
+output x;
+end

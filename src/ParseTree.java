@@ -667,7 +667,7 @@ public class ParseTree {
             //use this value to get the name of the ID
             name = currentToken.substring(3,currentToken.length()-1);
             //add to the symbol table if its not there
-            if(!symbolTable.containsKey(name)) {
+            if((!symbolTable.containsKey(name)) && caller.equals("DEC")) {
                 symbolTable.put(name, null);
             }
         }
@@ -683,6 +683,14 @@ public class ParseTree {
                 //if being called by CASE
             }
             else{
+                if(!symbolTable.containsKey(name)){
+                    System.out.println("ERROR: " + name + " was not declared.");
+                    System.exit(0);
+                }
+                if(symbolTable.get(name) == null){
+                    System.out.println("ERROR: " + name + " was not initialized.");
+                    System.exit(0);
+                }
                 returnVal = symbolTable.get(name);
             }
             return returnVal;
@@ -1042,6 +1050,7 @@ public class ParseTree {
             System.out.println();
             System.out.print("  end");
             System.out.println(";");
+            unind();
         }
     }
 
