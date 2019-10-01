@@ -9,13 +9,12 @@ public class Main {
      *Author: Andrew Storch
      */
     public static void main(String[] args) {
-        Scanner keyboard = new Scanner(System.in);
-        System.out.println("Please enter the name of the inputFile:");
-        String filename = keyboard.nextLine();
+        //get the file from the arguments
+        String filename = args[0];
         System.out.println("File Name: " + filename);
         Lexscan s = new Lexscan(filename);
-        System.out.println("Input name of second input file: (input values");
-        String inputValues = keyboard.nextLine();
+        //get file with input values
+        String inputValues = args[1];
         ArrayList<String> tokens = new ArrayList<>();
         String test = s.getNext();
         while(!(test.equals("EOF"))){
