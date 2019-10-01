@@ -17,7 +17,7 @@ public class ParseTree {
     //Int to hold position in ArrayList
     private int loc;
     //Symbol Table
-    HashMap<String, Integer> symbolTable = new HashMap();
+    private HashMap<String, Integer> symbolTable = new HashMap<String, Integer>();
 
     public ParseTree(ArrayList<String> in, String inputValuesFile){
         s = in;
@@ -61,6 +61,7 @@ public class ParseTree {
                 d1.parse();
             }else{
                 System.out.println("ERROR: Expecting keyword PROGRAM");
+                System.exit(0);
             }
             //Check if the next token available is BEGIN
             loc++;
@@ -71,12 +72,14 @@ public class ParseTree {
                 s1.parse();
             }else{
                 System.out.println("ERROR: Expecting keyword BEGIN");
+                System.exit(0);
             }
             //current token should be at END token
             loc++;
             currentToken = s.get(loc);
             if (!currentToken.equals("END")){
                 System.out.println("ERROR: Expecting keyword END");
+                System.exit(0);
             }
         }
 
@@ -240,6 +243,7 @@ public class ParseTree {
 
             else{
                 System.out.println("ERROR: Invalid Statement Token");
+                System.exit(0);
             }
         }
         public void exec(){
@@ -310,6 +314,7 @@ public class ParseTree {
             currentToken = s.get(loc);
             if(!currentToken.equals("ASSIGN")){
                 System.out.println("ERROR: Expected Assign Token");
+                System.exit(0);
             }
             //pass the expression the ID being  assigned
             e1 = new Expr(s.get(loc-1));
@@ -319,6 +324,7 @@ public class ParseTree {
             currentToken = s.get(loc);
             if(!currentToken.equals("SEMICOLON")){
                 System.out.println("ERROR: Expected ;");
+                System.exit(0);
             }
         }
         public void exec(){
@@ -344,6 +350,7 @@ public class ParseTree {
             currentToken = s.get(loc);
             if(!currentToken.equals("SEMICOLON")){
                 System.out.println("ERROR: Expected ;");
+                System.exit(0);
             }
         }
         public void exec(){
@@ -373,6 +380,7 @@ public class ParseTree {
             currentToken = s.get(loc);
             if(!currentToken.equals("SEMICOLON")){
                 System.out.println("ERROR: Expected ;");
+                System.exit(0);
             }
         }
         public void exec(){
@@ -562,6 +570,7 @@ public class ParseTree {
                     symbolTable.put(assignmentId.substring(3, assignmentId.length() - 1), value);
                 } else {
                     System.out.println("Error ID " + assignmentId + " does not exist in symbol table");
+                    System.exit(0);
                 }
             }
             return value;
@@ -592,6 +601,7 @@ public class ParseTree {
                 i1.parse();
             }else{
                 System.out.println("ERROR: Expected ID token");
+                System.exit(0);
             }
             //grab the next token and check if it is a comma
             loc++;
@@ -695,6 +705,7 @@ public class ParseTree {
                 currentToken = s.get(loc);
                 if(!currentToken.equals("ENDIF")){
                     System.out.println("ERROR: Expected ENDWHILE token.");
+                    System.exit(0);
                 }
                 //grab semicolon
                 loc++;
@@ -757,6 +768,7 @@ public class ParseTree {
                 currentToken = s.get(loc);
                 if(!currentToken.equals("(")){
                     System.out.println("ERROR: Expected Open Paren");
+                    System.exit(0);
                 }
                 cond1 = new Cond();
                 cond1.parse();
@@ -765,6 +777,7 @@ public class ParseTree {
                 currentToken = s.get(loc);
                 if(!currentToken.equals(")")){
                     System.out.println("ERROR: Expected Close Paren");
+                    System.exit(0);
                 }
             }
         }
@@ -834,6 +847,7 @@ public class ParseTree {
                 opt = 3;
             }else{
                 System.out.println("ERROR: Invalid CMPR, expected =, <, <=");
+                System.exit(0);
             }
             e2 = new Expr("");
             e2.parse();
@@ -899,6 +913,7 @@ public class ParseTree {
             currentToken = s.get(loc);
             if(!currentToken.equals("BEGIN")){
                 System.out.println("ERROR: Expected BEGIN");
+                System.exit(0);
             }
             s1 = new StmtSeq();
             s1.parse();
@@ -907,12 +922,14 @@ public class ParseTree {
             currentToken = s.get(loc);
             if(!currentToken.equals("ENDWHILE")){
                 System.out.println("ERROR: Expected ENDWHILE");
+                System.exit(0);
             }
             //grab the semicolon and check it
             loc++;
             currentToken = s.get(loc);
             if(!currentToken.equals("SEMICOLON")){
                 System.out.println("ERROR: Expected ;");
+                System.exit(0);
             }
         }
         private void exec(){
@@ -953,6 +970,7 @@ public class ParseTree {
             currentToken = s.get(loc);
             if(!currentToken.equals("OF")){
                 System.out.println("ERROR: Expected token OF");
+                System.exit(0);
             }
             caseLine1 = new CaseLine();
             caseLine1.parse();
@@ -961,6 +979,7 @@ public class ParseTree {
             currentToken = s.get(loc);
             if(!currentToken.equals("ELSE")){
                 System.out.println("ERROR: Expected token ELSE");
+                System.exit(0);
             }
             e1 = new Expr("");
             e1.parse();
@@ -969,12 +988,14 @@ public class ParseTree {
             currentToken = s.get(loc);
             if(!currentToken.equals("END")){
                 System.out.println("ERROR: Expected token END");
+                System.exit(0);
             }
             //grab the semicolon
             loc++;
             currentToken = s.get(loc);
             if(!currentToken.equals("SEMICOLON")){
                 System.out.println("ERROR: Expected ;");
+                System.exit(0);
             }
         }
         private void exec(){
@@ -1025,6 +1046,7 @@ public class ParseTree {
             currentToken = s.get(loc);
             if(!currentToken.equals("COLON")){
                 System.out.println("ERROR: Expected token :");
+                System.exit(0);
             }
             //create and parse the expression
             e1 = new Expr("");
@@ -1079,6 +1101,7 @@ public class ParseTree {
                 currentToken = s.get(loc);
                 if(!currentToken.equals("COMMA")){
                     System.out.println("ERROR: Expected token ,");
+                    System.exit(0);
                 }
                 //move to next const
                 loc++;
