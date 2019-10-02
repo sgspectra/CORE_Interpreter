@@ -13,7 +13,7 @@ public class ParseTree {
     //Int to hold position in ArrayList
     private int loc;
     //Symbol Table
-    private HashMap<String, Integer> symbolTable = new HashMap<String, Integer>();
+    private HashMap<String, Integer> symbolTable = new HashMap<>();
     //Indent
     private String indent = "";
 
@@ -839,7 +839,6 @@ public class ParseTree {
                     retVal = !cond1.exec();
                     break;
                 default:
-                    //todo remove this warning
                     System.out.println("Warning: COND took default in case switch");
                     retVal = false;
             }
