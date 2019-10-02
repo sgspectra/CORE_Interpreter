@@ -679,6 +679,10 @@ public class ParseTree {
         public int exec(){
             int returnVal = 0;
             if(caller.equals("INPUT")){
+                if(!fs.hasNextInt()){
+                    System.out.println("ERROR: invalid input");
+                    System.exit(0);
+                }
                 symbolTable.put(name,fs.nextInt());
             }else if(caller.equals("DEC")){
                 //Declerations were messing this up so this is here to catch calls to ID from decl
