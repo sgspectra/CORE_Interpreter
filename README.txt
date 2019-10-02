@@ -12,5 +12,5 @@ Change directory to bin
 $cd bin
 
 Call Main with 2 arguments, path to program and path to input
-$java Main ../Test/P10.txt ../Test/input.txt
+$java Main ../Test/p10.txt ../Test/input.txt
 
