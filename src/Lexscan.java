@@ -30,7 +30,7 @@ public class Lexscan {
         //String to hold return value
         String out = "";
         //String to hold characters to stop on, may indicate a token
-        String stops = ";,=!+*():<|";
+        String stops = "-;,=!+*():<|";
         //consume any whitespace
         while(Character.isWhitespace((char) ch)){
             advance();
