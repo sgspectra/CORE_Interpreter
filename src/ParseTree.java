@@ -422,27 +422,30 @@ public class ParseTree {
         private Term t1;
         private Expr e1;
         private String id;
+        private boolean paren;
 
         public Expr(String assId){
             t1 = null;
             e1 = null;
             plusMinus = 0;
             id = assId;
+            paren = false;
         }
 
 
         public void parse(){
+            //if the next token here is a paren then we know we have a special case
             //first parse the term
             t1 = new Term(id);
             t1.parse();
             //looks at next token
-            if(s.get(loc+1).equals("+")){
+            if (s.get(loc + 1).equals("+")) {
                 loc++;
                 currentToken = s.get(loc);
                 e1 = new Expr("");
                 e1.parse();
                 plusMinus = 1;
-            }else if(s.get(loc+1).equals("-")){
+            } else if (s.get(loc + 1).equals("-")) {
                 loc++;
                 currentToken = s.get(loc);
                 e1 = new Expr("");
@@ -450,6 +453,7 @@ public class ParseTree {
                 plusMinus = 2;
             }
         }
+
         public int exec(){
             int returnVal;
             returnVal = t1.exec();
@@ -506,7 +510,7 @@ public class ParseTree {
         public void print(){
             f1.print();
             if(t1 != null){
-                System.out.println("*");
+                System.out.print("*");
                 t1.print();
             }
 
@@ -530,19 +534,18 @@ public class ParseTree {
         public void parse(){
             loc++;
             currentToken = s.get(loc);
-            if(currentToken.substring(0,5).equals("CONST")){
-                opt = 1;
-                c1 = new Const(assignmentId);
-                c1.parse();
-            }else if(currentToken.substring(0,2).equals("ID")){
-                opt = 2;
-                i1 = new Id("FACTOR");
-                i1.parse();
+            if(currentToken.length()>2) {
+                if(currentToken.substring(0, 5).equals("CONST")) {
+                    opt = 1;
+                    c1 = new Const(assignmentId);
+                    c1.parse();
+                }else if (currentToken.substring(0, 2).equals("ID")) {
+                    opt = 2;
+                    i1 = new Id("FACTOR");
+                    i1.parse();
+                }
             }else{
                 opt = 3;
-                //consume paren
-                loc++;
-                currentToken = s.get(loc);
                 e1 = new Expr("");
                 e1.parse();
                 //consume paren
@@ -568,7 +571,9 @@ public class ParseTree {
             }else if(opt == 2){
                 i1.print();
             }else{
+                System.out.print("(");
                 e1.print();
+                System.out.print(")");
             }
         }
     }
