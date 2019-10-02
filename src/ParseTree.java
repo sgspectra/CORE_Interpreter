@@ -790,6 +790,9 @@ public class ParseTree {
                 //check to see if the next token is or
                 if(s.get(loc+1).equals("OR")){
                     opt = 2;
+                    //move to or as currentToken
+                    loc++;
+                    currentToken = s.get(loc);
                     //if it is or we need to parse another cond
                     cond1 = new Cond();
                     cond1.parse();
@@ -843,7 +846,7 @@ public class ParseTree {
                     break;
                 case 2:
                     cmpr1.print();
-                    System.out.println("or");
+                    System.out.print(" or ");
                     cond1.print();
                     break;
                 case 3:

@@ -1,0 +1,19 @@
+program
+int x,y,z;
+begin
+input x;
+input y;
+input z;
+while x<y begin
+x:=(x*z)-(z*z);
+endwhile;
+output x;
+z:=(x*z)-y;
+y:=(x+y+z);
+output y;
+output z;
+if y<x or z<x then
+x:=y;
+endif;
+output x;
+end
