@@ -340,7 +340,7 @@ public class ParseTree {
             //pass the expression the ID being  assigned
             e1 = new Expr(s.get(loc-1));
             e1.parse();
-            //consume the semilcolon
+            //consume the semicolon
             loc++;
             currentToken = s.get(loc);
             if(!currentToken.equals("SEMICOLON")){
@@ -683,7 +683,7 @@ public class ParseTree {
                     symbolTable.put(name, fs.nextInt());
                     break;
                 case "DEC":
-                    //Declerations were messing this up so this is here to catch calls to ID from decl
+                    //Declarations were messing this up so this is here to catch calls to ID from decl
                     break;
                 case "ASSIGN":
                     //if being called in assign do nothing?
