@@ -179,12 +179,10 @@ public class Lexscan {
         }
         //check if string should be a const
         else if(Character.isDigit(out.charAt(0))){
-            String tokenize = "CONST[" + out + "]";
-            out = tokenize;
+            out = "CONST[" + out + "]";
         }
         else{
-            String tokenize = "ID[" + out + "]";
-            out = tokenize;
+            out = "ID[" + out + "]";
         }
         return out;
     }
