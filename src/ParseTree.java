@@ -7,8 +7,6 @@ public class ParseTree {
     private Program p;
     //ArrayList of Tokens
     private ArrayList<String> s;
-    //File Reader to access values
-    private File fileName;
     private Scanner fs;
     //Variable to hold token from Scanner
     private String currentToken;
@@ -17,13 +15,14 @@ public class ParseTree {
     //Symbol Table
     private HashMap<String, Integer> symbolTable = new HashMap<String, Integer>();
     //Indent
-    String indent = "";
+    private String indent = "";
 
     public ParseTree(ArrayList<String> in, String inputValuesFile){
         s = in;
         loc = 0;
         p = new Program();
-        fileName = new File(inputValuesFile);
+        //File Reader to access values
+        File fileName = new File(inputValuesFile);
         try {
             fs = new Scanner(fileName);
         }catch (IOException e){
@@ -422,14 +421,12 @@ public class ParseTree {
         private Term t1;
         private Expr e1;
         private String id;
-        private boolean paren;
 
         public Expr(String assId){
             t1 = null;
             e1 = null;
             plusMinus = 0;
             id = assId;
-            paren = false;
         }
 
 
@@ -678,29 +675,34 @@ public class ParseTree {
         }
         public int exec(){
             int returnVal = 0;
-            if(caller.equals("INPUT")){
-                if(!fs.hasNextInt()){
-                    System.out.println("ERROR: invalid input");
-                    System.exit(0);
-                }
-                symbolTable.put(name,fs.nextInt());
-            }else if(caller.equals("DEC")){
-                //Declerations were messing this up so this is here to catch calls to ID from decl
-            }else if(caller.equals("ASSIGN")){
-                //if being called in assign do nothing?
-            }else if(caller.equals("CASE")){
-                //if being called by CASE
-            }
-            else{
-                if(!symbolTable.containsKey(name)){
-                    System.out.println("ERROR: " + name + " was not declared.");
-                    System.exit(0);
-                }
-                if(symbolTable.get(name) == null){
-                    System.out.println("ERROR: " + name + " was not initialized.");
-                    System.exit(0);
-                }
-                returnVal = symbolTable.get(name);
+            switch (caller) {
+                case "INPUT":
+                    if (!fs.hasNextInt()) {
+                        System.out.println("ERROR: invalid input");
+                        System.exit(0);
+                    }
+                    symbolTable.put(name, fs.nextInt());
+                    break;
+                case "DEC":
+                    //Declerations were messing this up so this is here to catch calls to ID from decl
+                    break;
+                case "ASSIGN":
+                    //if being called in assign do nothing?
+                    break;
+                case "CASE":
+                    //if being called by CASE
+                    break;
+                default:
+                    if (!symbolTable.containsKey(name)) {
+                        System.out.println("ERROR: " + name + " was not declared.");
+                        System.exit(0);
+                    }
+                    if (symbolTable.get(name) == null) {
+                        System.out.println("ERROR: " + name + " was not initialized.");
+                        System.exit(0);
+                    }
+                    returnVal = symbolTable.get(name);
+                    break;
             }
             return returnVal;
         }
@@ -882,21 +884,25 @@ public class ParseTree {
             //check what the next token is
             loc++;
             currentToken = s.get(loc);
-            if(currentToken.equals("=")){
-                opt = 1;
-            }else if(currentToken.equals("<")){
-                opt = 2;
-            }else if(currentToken.equals("<=")){
-                opt = 3;
-            }else{
-                System.out.println("ERROR: Invalid CMPR, expected =, <, <=");
-                System.exit(0);
+            switch (currentToken) {
+                case "=":
+                    opt = 1;
+                    break;
+                case "<":
+                    opt = 2;
+                    break;
+                case "<=":
+                    opt = 3;
+                    break;
+                default:
+                    System.out.println("ERROR: Invalid CMPR, expected =, <, <=");
+                    System.exit(0);
             }
             e2 = new Expr("");
             e2.parse();
         }
         private Boolean exec(){
-            Boolean retVal;
+            boolean retVal;
             switch (opt){
                 case 1:
                     retVal = e1.exec() == e2.exec();
