@@ -1,13 +1,12 @@
 import java.io.*;
 
 public class Lexscan {
-    private File file = null;
     private FileReader fr = null;
     private int ch,prev;
 
     public Lexscan(String inFile){
         try {
-            this.file = new File(inFile);
+            File file = new File(inFile);
             this.fr = new FileReader(file);
             this.ch = fr.read();
             this.prev = this.ch;
