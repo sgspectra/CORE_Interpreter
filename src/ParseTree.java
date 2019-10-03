@@ -671,6 +671,10 @@ public class ParseTree {
             if((!symbolTable.containsKey(name)) && caller.equals("DEC")) {
                 symbolTable.put(name, null);
             }
+            else if((symbolTable.containsKey(name)) && caller.equals(("DEC"))){
+                System.out.println("ERROR: Variable declared multiple times");
+                System.exit(0);
+            }
         }
         public int exec(){
             int returnVal = 0;
@@ -769,9 +773,12 @@ public class ParseTree {
             System.out.println(" then");
             s1.print();
             if(s2 != null){
-                System.out.println("  else");
+                System.out.print(indent);
+                System.out.println("else");
                 s2.print();
             }
+            System.out.print(indent);
+            System.out.println("endif;");
         }
     }
 
@@ -854,10 +861,10 @@ public class ParseTree {
                     cond1.print();
                     break;
                 case 3:
-                    System.out.println("!");
-                    System.out.println("(");
+                    System.out.print("!");
+                    System.out.print("(");
                     cond1.print();
-                    System.out.println(")");
+                    System.out.print(")");
                     break;
                 default:
                     System.out.println("Warning: COND took default in case switch (print)");
@@ -1060,11 +1067,14 @@ public class ParseTree {
             caseLine1.print();
             unind();
             System.out.println();
-            System.out.println("  else");
+            System.out.print(indent);
+            System.out.println("else");
             ind();
             e1.print();
+            unind();
             System.out.println();
-            System.out.print("  end");
+            System.out.print(indent);
+            System.out.print("end");
             System.out.println(";");
             unind();
         }
