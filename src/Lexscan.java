@@ -20,8 +20,30 @@ public class Lexscan {
             //store the previous character and grab the next one
             prev = ch;
             ch = fr.read();
+            if(!(ch == -1)) {
+                checkValid((char) ch);
+            }
         }catch (IOException e){
             e.printStackTrace();
+        }
+    }
+    //This method will check if a character is valid in the language and
+    //exit to the OS if it is not valid
+    private void checkValid(char c){
+        boolean permit = false;
+        String allowed = "-;,=!+*():<|";
+        if(!((allowed.indexOf(c)) == -1)){
+            permit = true;
+        }
+        if(Character.isLetterOrDigit(c)){
+            permit = true;
+        }
+        if(Character.isWhitespace(c)){
+            permit = true;
+        }
+        if(!permit){
+            System.out.println("ERROR: Invalid character in the input file");
+            System.exit(0);
         }
     }
 
