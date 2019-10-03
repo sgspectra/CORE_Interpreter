@@ -150,6 +150,11 @@ public class ParseTree {
         public void parse(){
             s1 = new Stmt();
             s1.parse();
+            //make sure not at end of token stream
+            if(loc+1 >= s.size()){
+                System.out.println("ERROR: Unexpected end to token stream");
+                System.exit(0);
+            }
             //if the next token is not END parse another StmtSeq
             if (!(s.get(loc+1).equals("END") || s.get(loc+1).equals("ENDIF") || s.get(loc+1).equals("ENDWHILE") || s.get(loc+1).equals("ELSE"))){
                 s2 = new StmtSeq();
@@ -793,12 +798,22 @@ public class ParseTree {
         }
 
         private void parse(){
+            //make sure not at end of token stream
+            if(loc+1 >= s.size()){
+                System.out.println("ERROR: Unexpected end to token stream");
+                System.exit(0);
+            }
             //right now token should still be if, look ahead one to see if there is a ! token
             if(!s.get(loc+1).equals("!")){
                 opt = 1;
                 //if it isn't we can grab first comp
                 cmpr1 = new Cmpr();
                 cmpr1.parse();
+                //make sure not at end of token stream
+                if(loc+1 >= s.size()){
+                    System.out.println("ERROR: Unexpected end to token stream");
+                    System.exit(0);
+                }
                 //check to see if the next token is or
                 if(s.get(loc+1).equals("OR")){
                     opt = 2;
@@ -1157,6 +1172,11 @@ public class ParseTree {
         }
 
         private void parse(){
+            //make sure not at end of token stream
+            if(loc+1 >= s.size()){
+                System.out.println("ERROR: Unexpected end to token stream");
+                System.exit(0);
+            }
             //check to see if the next value is a comma
             if(s.get(loc+1).equals("COMMA")){
                 //if it is comma consume the comma
@@ -1202,6 +1222,11 @@ public class ParseTree {
         private CaseLine cl1;
 
         private void parse(){
+            //make sure not at end of token stream
+            if(loc+1 >= s.size()){
+                System.out.println("ERROR: Unexpected end to token stream");
+                System.exit(0);
+            }
             //look ahead for BAR
             if(s.get(loc+1).equals("BAR")){
                 //consume BAR
